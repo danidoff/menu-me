@@ -1,0 +1,73 @@
+.book-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0; /* remove extra horizontal padding */
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.flipbook-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Remove any extra padding from the flipbook itself */
+.flipbook {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 500px !important;
+    min-height: 700px !important;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    border: none !important;
+}
+
+/* Ensure each page inside the flipbook is contained */
+.flip-page {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-text {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 1000;
+}
+
+.close-btn:hover {
+    background: #ff3333;
+    color: white;
+}
+
+/* Optional: additional media query adjustments */
+@media (min-width: 768px) {
+    .pdf-viewer {
+        padding: 20px;
+    }
+}

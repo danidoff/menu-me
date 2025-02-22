@@ -1,0 +1,38 @@
+.home-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: url('/background.png') no-repeat center center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-container * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn {
+    padding: 15px 30px;
+    background: rgba(255, 255, 255, 0.85);
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+}
