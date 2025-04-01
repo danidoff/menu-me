@@ -64,11 +64,6 @@ export default function PDFViewer({ file, onClose }) {
 
     return (
         <div className="pdf-viewer">
-            {onClose && (
-                <button onClick={onClose} className="close-btn">
-                    X
-                </button>
-            )}
             <div className="book-container">
                 <Document
                     file={file}
