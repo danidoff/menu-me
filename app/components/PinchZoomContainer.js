@@ -21,10 +21,15 @@ export default function PinchZoomContainer({ children }) {
             const dx = touch2.pageX - touch1.pageX;
             const dy = touch2.pageY - touch1.pageY;
             const currentDistance = Math.hypot(dx, dy);
-            // Calculate new scale relative to the initial distance
             const newScale = currentDistance / initialDistanceRef.current;
-            // Limit scale between 1 (no zoom) and 3 (max zoom)
-            setScale(Math.min(Math.max(newScale, 1), 3));
+            const clampedScale = Math.min(Math.max(newScale, 1), 3);
+            setScale(clampedScale);
+
+            // If we're zoomed in, prevent swipe propagation
+            if (clampedScale > 1.01) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
         }
     };
 
