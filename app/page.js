@@ -9,7 +9,7 @@ export default function Home() {
   const [selectedPDF, setSelectedPDF] = useState("/pdfs/summer-breeze.pdf");
 
   return (
-      <div className="home-container">
+      <div className="home-container ">
           <PDFViewer file={"/pdfs/summer-breeze.pdf"} />
       </div>
   );
