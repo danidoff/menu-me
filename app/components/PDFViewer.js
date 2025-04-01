@@ -45,8 +45,10 @@ const calculateDimensions = () => {
 };
 
 
-export default function PDFViewer({file, onClose}) {
+export default function PDFViewer({file}) {
     const [dimensions, setDimensions] = useState(calculateDimensions);
+    const [scale, setScale] = useState(1); // scale from pinch zoom
+    const [isZoomed, setIsZoomed] = useState(false);
     const [numPages, setNumPages] = useState(null);
     const [pages, setPages] = useState([]);
     const resizeTimeout = useRef(null);
@@ -73,12 +75,18 @@ export default function PDFViewer({file, onClose}) {
             setPages(
                 Array.from({length: numPages}, (_, index) => (
                     <div key={index} className="flip-page-wrapper">
-                        <Page pageNumber={index + 1} width={dimensions.width}/>
+                        <Page pageNumber={index + 1} width={dimensions.width * scale}/>
                     </div>
                 ))
             );
         }
     }, [numPages, dimensions]);
+
+    // Handler from the PinchZoomContainer to update zoom state
+    const handleZoomChange = (newScale) => {
+        setScale(newScale);
+        setIsZoomed(newScale > 1.01);
+    };
 
     return (
         <div className="pdf-viewer">
@@ -89,18 +97,21 @@ export default function PDFViewer({file, onClose}) {
                 >
                     {numPages ? (
                         <div className="flipbook-wrapper">
-                            <PinchZoomContainer>
+                            <PinchZoomContainer onZoomChange={handleZoomChange}>
+                                <div style={{
+                                    // When zoomed, disable pointer events so HTMLFlipBook doesn't receive swipe events
+                                    pointerEvents: isZoomed ? "none" : "auto",
+                                }}>
                                 <HTMLFlipBook 
                                     maxShadowOpacity={1}
                                     autoSize={false}
-                                    width={dimensions.width}
-                                    height={dimensions.height}
+                                    width={dimensions.width * scale}
+                                    height={dimensions.height * scale}
                                     size="stretch"
-                                    // Set min and max dimensions equal to the calculated values
-                                    minWidth={dimensions.width}
-                                    maxWidth={dimensions.width}
-                                    minHeight={dimensions.height}
-                                    maxHeight={dimensions.height}
+                                    minWidth={dimensions.width * scale}
+                                    maxWidth={dimensions.width * scale}
+                                    minHeight={dimensions.height * scale}
+                                    maxHeight={dimensions.height * scale}
                                     showCover={true}
                                     mobileScrollSupport={true}
                                     drawShadow={false}
@@ -120,6 +131,7 @@ export default function PDFViewer({file, onClose}) {
                                 >
                                     {pages}
                                 </HTMLFlipBook>
+                                </div>
                             </PinchZoomContainer>
                         </div>
                     ) : (
