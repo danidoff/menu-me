@@ -1,11 +1,12 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
+import {useState, useEffect, useRef} from "react";
+import {Document, Page, pdfjs} from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import HTMLFlipBook from "react-pageflip";
 import "../../styles/pdfViewer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import Loading from "@/app/components/Loading";
+import PinchZoomContainer from "@/app/components/PinchZoomContainer";
 
 // Set the PDF.js worker path (ensure pdf.worker.min.js is in public/)
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
@@ -20,7 +21,7 @@ const calculateDimensions = () => {
         // Mobile: use 95% of the viewport width and height, preserving A4 ratio
         const width = windowWidth * 0.95;
         const height = Math.min(windowHeight * 0.95, width * A4_RATIO);
-        return { width, height };
+        return {width, height};
     } else {
         // Desktop: reserve space for header and margins
         const headerHeight = 100; // pixels reserved for the header
@@ -39,12 +40,12 @@ const calculateDimensions = () => {
             height = availableHeight;
             width = height / A4_RATIO;
         }
-        return { width, height };
+        return {width, height};
     }
 };
 
 
-export default function PDFViewer({ file, onClose }) {
+export default function PDFViewer({file, onClose}) {
     const [dimensions, setDimensions] = useState(calculateDimensions);
     const [numPages, setNumPages] = useState(null);
     const [pages, setPages] = useState([]);
@@ -70,9 +71,9 @@ export default function PDFViewer({ file, onClose }) {
     useEffect(() => {
         if (numPages) {
             setPages(
-                Array.from({ length: numPages }, (_, index) => (
+                Array.from({length: numPages}, (_, index) => (
                     <div key={index} className="flip-page-wrapper">
-                        <Page pageNumber={index + 1} width={dimensions.width} />
+                        <Page pageNumber={index + 1} width={dimensions.width}/>
                     </div>
                 ))
             );
@@ -83,40 +84,43 @@ export default function PDFViewer({ file, onClose }) {
         <div className="pdf-viewer">
             <div className="book-container">
                 <Document loading={<Loading/>}
-                    file={file}
-                    onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                          file={file}
+                          onLoadSuccess={({numPages}) => setNumPages(numPages)}
                 >
                     {numPages ? (
                         <div className="flipbook-wrapper">
-                            <HTMLFlipBook
-                                autoSize={false}
-                                width={dimensions.width}
-                                height={dimensions.height}
-                                size="stretch"
-                                // Set min and max dimensions equal to the calculated values
-                                minWidth={dimensions.width}
-                                maxWidth={dimensions.width}
-                                minHeight={dimensions.height}
-                                maxHeight={dimensions.height}
-                                showCover={true}
-                                mobileScrollSupport={true}
-                                drawShadow={false}
-                                flippingTime={600}
-                                useMouseEvents={true}
-                                clickEventForward={true}
-                                showPageCorners={true}
-                                disableFlipByClick={false}
-                                startPage={0}
-                                startZIndex={1}
-                                swipeDistance={30}
-                                usePortrait={true}
-                                onFlip={(e) =>
-                                    console.log(`Flipped to page ${e.data}`)
-                                }
-                                className="flipbook"
-                            >
-                                {pages}
-                            </HTMLFlipBook>
+                            <PinchZoomContainer>
+                                <HTMLFlipBook 
+                                    maxShadowOpacity={1}
+                                    autoSize={false}
+                                    width={dimensions.width}
+                                    height={dimensions.height}
+                                    size="stretch"
+                                    // Set min and max dimensions equal to the calculated values
+                                    minWidth={dimensions.width}
+                                    maxWidth={dimensions.width}
+                                    minHeight={dimensions.height}
+                                    maxHeight={dimensions.height}
+                                    showCover={true}
+                                    mobileScrollSupport={true}
+                                    drawShadow={false}
+                                    flippingTime={600}
+                                    useMouseEvents={true}
+                                    clickEventForward={true}
+                                    showPageCorners={true}
+                                    disableFlipByClick={false}
+                                    startPage={0}
+                                    startZIndex={1}
+                                    swipeDistance={30}
+                                    usePortrait={true}
+                                    // onFlip={(e) =>
+                                    //     console.log(`Flipped to page ${e.data}`)
+                                    // }
+                                    className="flipbook"
+                                >
+                                    {pages}
+                                </HTMLFlipBook>
+                            </PinchZoomContainer>
                         </div>
                     ) : (
                         <p className="loading-text">Loading PDF...</p>
