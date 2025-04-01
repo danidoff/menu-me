@@ -1,9 +1,10 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import {useSearchParams} from "next/navigation";
 import dynamic from "next/dynamic";
+import {Suspense} from "react";
 import "../styles/home.css";
 
-const PDFViewer = dynamic(() => import("./components/PDFViewer"), { ssr: false });
+const PDFViewer = dynamic(() => import("./components/PDFViewer"), {ssr: false});
 
 export default function Home() {
     const searchParams = useSearchParams();
@@ -16,9 +17,11 @@ export default function Home() {
 
     const fileUrl = pdfId && pdfMapping[pdfId] ? pdfMapping[pdfId] : null;
 
-  return (
-      <div className="home-container ">
-          <PDFViewer file={fileUrl} />
-      </div>
-  );
+    return (
+        <div className="home-container ">
+            <Suspense fallback={<div>Loading...</div>}>
+                <PDFViewer file={fileUrl}/>
+            </Suspense>
+        </div>
+    );
 }
