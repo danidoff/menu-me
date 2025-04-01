@@ -1,71 +1,61 @@
 "use client";
-import {useState, useEffect, useRef} from "react";
-import {Document, Page, pdfjs} from "react-pdf";
+import { useState, useEffect, useRef } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import HTMLFlipBook from "react-pageflip";
 import "../../styles/pdfViewer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
-// Set the PDF.js worker path (make sure you’ve copied pdf.worker.min.js to your public folder)
+// Set the PDF.js worker path (ensure pdf.worker.min.js is in public/)
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
-// Helper function to calculate dimensions based on the window size
+// Calculate dimensions based on the viewport
 const calculateDimensions = () => {
     const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
     if (windowWidth < 768) {
-        // Use 98% of the screen width and calculate a proportional height.
-        const width = Math.floor(windowWidth * 1.1);
-        // Let's assume an aspect ratio of 4:3 (you can adjust this if needed)
-        const height = Math.floor((width * 3) / 4);
+        // On mobile: use 95% of the viewport width and height,
+        // and constrain the height to maintain an approximate PDF aspect ratio.
+        const width = windowWidth * 0.95;
+        // Assume an aspect ratio (height/width) around 1.414 (like an A4 sheet in portrait)
+        const height = Math.min(windowHeight * 0.95, width * 1.414);
         return { width, height };
     } else {
+        // On desktop, you can use fixed dimensions or a similar calculation
         return { width: 600, height: 900 };
     }
 };
 
-export default function PDFViewer({file, onClose}) {
-    // Initialize dimensions once
+export default function PDFViewer({ file, onClose }) {
     const [dimensions, setDimensions] = useState(calculateDimensions);
     const [numPages, setNumPages] = useState(null);
     const [pages, setPages] = useState([]);
     const resizeTimeout = useRef(null);
 
-    // Effect: update dimensions on window resize using debouncing
+    // Update dimensions on window resize (debounced)
     useEffect(() => {
         const handleResize = () => {
-            if (resizeTimeout.current) {
-                clearTimeout(resizeTimeout.current);
-            }
+            if (resizeTimeout.current) clearTimeout(resizeTimeout.current);
             resizeTimeout.current = setTimeout(() => {
                 const newDimensions = calculateDimensions();
-                setDimensions((prev) => {
-                    // Only update if dimensions changed
-                    if (
-                        prev &&
-                        prev.width === newDimensions.width &&
-                        prev.height === newDimensions.height
-                    ) {
-                        return prev;
-                    }
-                    return newDimensions;
-                });
+                setDimensions(newDimensions);
             }, 200);
         };
-
         window.addEventListener("resize", handleResize);
         return () => {
             window.removeEventListener("resize", handleResize);
             if (resizeTimeout.current) clearTimeout(resizeTimeout.current);
         };
-    }, []); // Empty dependency array: run only once on mount
+    }, []);
 
-    // Effect: update pages when PDF is loaded or dimensions change
+    // Recompute pages when the PDF loads or dimensions change
     useEffect(() => {
         if (numPages) {
             setPages(
-                Array.from({length: numPages}, (_, index) => (
-                    <div key={index}>
-                        <Page className="flip-page" pageNumber={index + 1} width={dimensions.width}/>
+                Array.from({ length: numPages }, (_, index) => (
+                    <div key={index} className="flip-page-wrapper">
+                        <Page pageNumber={index + 1} width={dimensions.width} />
                     </div>
                 ))
             );
@@ -74,13 +64,15 @@ export default function PDFViewer({file, onClose}) {
 
     return (
         <div className="pdf-viewer">
-            <button onClick={onClose} className="close-btn">
-                X
-            </button>
+            {onClose && (
+                <button onClick={onClose} className="close-btn">
+                    X
+                </button>
+            )}
             <div className="book-container">
                 <Document
                     file={file}
-                    onLoadSuccess={({numPages}) => setNumPages(numPages)}
+                    onLoadSuccess={({ numPages }) => setNumPages(numPages)}
                 >
                     {numPages ? (
                         <div className="flipbook-wrapper">
@@ -89,13 +81,14 @@ export default function PDFViewer({file, onClose}) {
                                 width={dimensions.width}
                                 height={dimensions.height}
                                 size="stretch"
-                                minWidth={dimensions.width * 0.8}
+                                // Set min and max dimensions equal to the calculated values
+                                minWidth={dimensions.width}
                                 maxWidth={dimensions.width}
-                                minHeight={dimensions.height * 0.8}
+                                minHeight={dimensions.height}
                                 maxHeight={dimensions.height}
                                 showCover={true}
                                 mobileScrollSupport={true}
-                                drawShadow={true}
+                                drawShadow={false}
                                 flippingTime={600}
                                 useMouseEvents={true}
                                 clickEventForward={true}
@@ -103,13 +96,11 @@ export default function PDFViewer({file, onClose}) {
                                 disableFlipByClick={false}
                                 startPage={0}
                                 startZIndex={1}
-                                style={{
-                                    border: "1px solid #ddd",
-                                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                                }}
                                 swipeDistance={30}
                                 usePortrait={true}
-                                onFlip={(e) => console.log(`Flipped to page ${e.data}`)}
+                                onFlip={(e) =>
+                                    console.log(`Flipped to page ${e.data}`)
+                                }
                                 className="flipbook"
                             >
                                 {pages}

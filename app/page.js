@@ -6,17 +6,11 @@ import "../styles/home.css";
 const PDFViewer = dynamic(() => import("./components/PDFViewer"), { ssr: false });
 
 export default function Home() {
-  const [selectedPDF, setSelectedPDF] = useState(null);
+  const [selectedPDF, setSelectedPDF] = useState("/pdfs/summer-breeze.pdf");
 
   return (
       <div className="home-container">
-        {selectedPDF ? (
-            <PDFViewer file={selectedPDF} onClose={() => setSelectedPDF(null)} />
-        ) : (
-            <div className="buttons-container">
-              <button className="btn" onClick={() => setSelectedPDF("/pdfs/summer-breeze.pdf")}>Menu</button>
-            </div>
-        )}
+          <PDFViewer file={"/pdfs/summer-breeze.pdf"} />
       </div>
   );
 }
