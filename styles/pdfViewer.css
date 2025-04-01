@@ -9,6 +9,14 @@
     justify-content: center;
 }
 
+.document-title {
+    color: white; /* Sets text to white */
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2rem; /* Adjust as needed */
+}
+
+
 /* Ensure the container fills the viewport on all devices */
 .book-container {
     width: 100vw;

@@ -1,4 +1,5 @@
 "use client";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import "../../styles/home.css";
@@ -6,6 +7,7 @@ import "../../styles/home.css";
 const PDFViewer = dynamic(() => import("./PDFViewer"), { ssr: false });
 
 export default function PDFPage() {
+    
     const searchParams = useSearchParams();
     const pdfId = searchParams.get("id");
 

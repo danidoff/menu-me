@@ -5,6 +5,7 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import HTMLFlipBook from "react-pageflip";
 import "../../styles/pdfViewer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
+import Loading from "@/app/components/Loading";
 
 // Set the PDF.js worker path (ensure pdf.worker.min.js is in public/)
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
@@ -13,19 +14,35 @@ pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 const calculateDimensions = () => {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
+    const A4_RATIO = 1.414; // height = width * 1.414 for A4
 
     if (windowWidth < 768) {
-        // On mobile: use 95% of the viewport width and height,
-        // and constrain the height to maintain an approximate PDF aspect ratio.
+        // Mobile: use 95% of the viewport width and height, preserving A4 ratio
         const width = windowWidth * 0.95;
-        // Assume an aspect ratio (height/width) around 1.414 (like an A4 sheet in portrait)
-        const height = Math.min(windowHeight * 0.95, width * 1.414);
+        const height = Math.min(windowHeight * 0.95, width * A4_RATIO);
         return { width, height };
     } else {
-        // On desktop, you can use fixed dimensions or a similar calculation
-        return { width: 600, height: 900 };
+        // Desktop: reserve space for header and margins
+        const headerHeight = 100; // pixels reserved for the header
+        const verticalMargin = 40; // additional margin (top + bottom)
+        const availableHeight = windowHeight - headerHeight - verticalMargin;
+        // Optionally, use a percentage of the window width
+        const availableWidth = windowWidth * 0.6;
+
+        // Start by assuming we can use the full available width
+        let width = availableWidth;
+        let height = width * A4_RATIO;
+
+        // If the calculated height is too tall for the available height,
+        // adjust the width to fit the available height
+        if (height > availableHeight) {
+            height = availableHeight;
+            width = height / A4_RATIO;
+        }
+        return { width, height };
     }
 };
+
 
 export default function PDFViewer({ file, onClose }) {
     const [dimensions, setDimensions] = useState(calculateDimensions);
@@ -65,7 +82,7 @@ export default function PDFViewer({ file, onClose }) {
     return (
         <div className="pdf-viewer">
             <div className="book-container">
-                <Document
+                <Document loading={<Loading/>}
                     file={file}
                     onLoadSuccess={({ numPages }) => setNumPages(numPages)}
                 >
