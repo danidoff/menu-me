@@ -18,10 +18,12 @@ export default function Home() {
     const fileUrl = pdfId && pdfMapping[pdfId] ? pdfMapping[pdfId] : null;
 
     return (
-        <div className="home-container ">
-            <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div>Loading...</div>}>
+            <div className="home-container ">
+
                 <PDFViewer file={fileUrl}/>
-            </Suspense>
-        </div>
+
+            </div>
+        </Suspense>
     );
 }
