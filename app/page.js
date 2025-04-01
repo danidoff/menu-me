@@ -17,7 +17,7 @@ export default function Home() {
     const fileUrl = pdfId && pdfMapping[pdfId] ? pdfMapping[pdfId] : null;
 
   return (
-      <div className="home-container">
+      <div className="home-container ">
           <PDFViewer file={fileUrl} />
       </div>
   );
