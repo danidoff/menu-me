@@ -1,5 +1,5 @@
 "use client";
-import {useState, useEffect, useRef} from "react";
+import {useState, useEffect, useRef, useCallback} from "react";
 import {Document, Page, pdfjs} from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import HTMLFlipBook from "react-pageflip";
@@ -47,8 +47,6 @@ const calculateDimensions = () => {
 
 export default function PDFViewer({file}) {
     const [dimensions, setDimensions] = useState(calculateDimensions);
-    const [scale, setScale] = useState(1); // scale from pinch zoom
-    const [isZoomed, setIsZoomed] = useState(false);
     const [numPages, setNumPages] = useState(null);
     const [pages, setPages] = useState([]);
     const resizeTimeout = useRef(null);
@@ -69,24 +67,19 @@ export default function PDFViewer({file}) {
         };
     }, []);
 
-    // Recompute pages when the PDF loads or dimensions change
-    useEffect(() => {
-        if (numPages) {
-            setPages(
-                Array.from({length: numPages}, (_, index) => (
-                    <div key={index} className="flip-page-wrapper">
-                        <Page pageNumber={index + 1} width={dimensions.width * scale}/>
-                    </div>
-                ))
-            );
-        }
+    const generatePages = useCallback(() => {
+        return Array.from({length: numPages}, (_, index) => (
+            <div key={index} className="flip-page-wrapper">
+                <Page pageNumber={index + 1} width={dimensions.width} height={dimensions.height} />
+            </div>
+        ));
     }, [numPages, dimensions]);
 
-    // Handler from the PinchZoomContainer to update zoom state
-    const handleZoomChange = (newScale) => {
-        setScale(newScale);
-        setIsZoomed(newScale > 1.01);
-    };
+    useEffect(() => {
+        if (numPages) {
+            setPages(generatePages());
+        }
+    }, [numPages, dimensions, generatePages]);
 
     return (
         <div className="pdf-viewer">
@@ -97,21 +90,16 @@ export default function PDFViewer({file}) {
                 >
                     {numPages ? (
                         <div className="flipbook-wrapper">
-                            <PinchZoomContainer onZoomChange={handleZoomChange}>
-                                <div style={{
-                                    // When zoomed, disable pointer events so HTMLFlipBook doesn't receive swipe events
-                                    pointerEvents: isZoomed ? "none" : "auto",
-                                }}>
                                 <HTMLFlipBook 
                                     maxShadowOpacity={1}
                                     autoSize={false}
-                                    width={dimensions.width * scale}
-                                    height={dimensions.height * scale}
-                                    size="stretch"
-                                    minWidth={dimensions.width * scale}
-                                    maxWidth={dimensions.width * scale}
-                                    minHeight={dimensions.height * scale}
-                                    maxHeight={dimensions.height * scale}
+                                    width={dimensions.width}
+                                    height={dimensions.height}
+                                    size="fixed"
+                                    minWidth={dimensions.width}
+                                    maxWidth={dimensions.width}
+                                    minHeight={dimensions.height}
+                                    maxHeight={dimensions.height}
                                     showCover={true}
                                     mobileScrollSupport={true}
                                     drawShadow={false}
@@ -131,8 +119,6 @@ export default function PDFViewer({file}) {
                                 >
                                     {pages}
                                 </HTMLFlipBook>
-                                </div>
-                            </PinchZoomContainer>
                         </div>
                     ) : (
                         <p className="loading-text">Loading PDF...</p>
